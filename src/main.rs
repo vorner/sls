@@ -97,12 +97,21 @@ impl InputMsg {
         let msec = match self.method() {
             "initialize" |
             "textDocument/didOpen" => 100,
-            "textDocument/didChange" => 200,
+            "textDocument/didChange" => 50,
             "textDocument/didSave" => 400,
             "textDocument/completion" => 300,
             _ => 0,
         };
         Duration::from_millis(msec)
+    }
+    fn params(&self) -> &Value {
+        match *self {
+            InputMsg::Rpc { ref params, .. } |
+            InputMsg::Notification(Notification { ref params, .. }) => params,
+        }
+    }
+    fn uri(&self) -> Option<&str> {
+        self.params()["uri"].as_str()
     }
     fn response(&self) -> Option<Response> {
         let method = self.method();
@@ -129,6 +138,24 @@ impl InputMsg {
                     }
                 }
             })),
+            "textDocument/didChange" => {
+                self.uri()
+                    .map(|uri| {
+                        Response::Notification(Notification {
+                            jsonrpc: ver(),
+                            method: "textDocument/publishDiagnostics".to_owned(),
+                            params: json!({
+                                "uri": uri,
+                                "diagnostics":[],
+                            }),
+                        })
+                    })
+            },
+            "textDocument/completion" => Response::response(self, json!([{
+                "label": "completion",
+                "kind": 8,
+                "detail": "Useless completion",
+            }])),
             _ => {
                 warn!("Unknown method {}", method);
                 Response::unimplemented(self)
