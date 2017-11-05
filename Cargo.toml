@@ -2,5 +2,14 @@
 name = "sls"
 version = "0.1.0"
 authors = ["Michal 'vorner' Vaner <vorner@vorner.cz>"]
+description = "Testing Sleepy Language Server"
+repository = "https://github.com/vorner/sls"
+readme = "README.md"
+license = "Apache-2.0/MIT"
 
 [dependencies]
+env_logger = "~0.4"
+log = "~0.3"
+serde = "~1"
+serde_derive = "~1"
+serde_json = "~1"
