@@ -165,13 +165,15 @@ impl InputMsg {
 }
 
 fn main() {
+    env_logger::init().unwrap();
     let stdin = io::stdin();
     let mut stdin = stdin.lock();
     loop {
         // Ugly and expects there's only just that one header.
         let mut line = String::new();
         stdin.read_line(&mut line).expect("Couldn't read length");
-        let len = line.split(' ')
+        debug!("Line: {}", line);
+        let len = line.split_whitespace()
             .nth(1)
             .expect("Malformed header")
             .parse()
